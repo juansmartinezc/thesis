@@ -2,6 +2,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
+histograms_directory = 'results/histograms/'
 
 def plot_years_histogram(df):
     # Verificar la estructura de la columna "year"
@@ -20,7 +21,7 @@ def plot_years_histogram(df):
     plt.grid(axis='y', linestyle='--', alpha=0.7)
 
     # Guardar la imagen y mostrarla
-    plt.savefig("distribucion_datos_por_anio.png")
+    plt.savefig(f"{histograms_directory}distribucion_datos_por_anio.png")
     plt.show()
 
 def plot_crops_states(df):
@@ -37,5 +38,5 @@ def plot_crops_states(df):
     plt.grid(axis='y', linestyle='--', alpha=0.7)
 
     # Guardar la imagen y mostrarla
-    plt.savefig("distribucion_datos_por_estado.png")
+    plt.savefig(f"{histograms_directory}distribucion_datos_por_estado.png")
     plt.show()

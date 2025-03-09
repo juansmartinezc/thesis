@@ -1,3 +1,5 @@
 /plot_venv/*
 results/*
 /excel/*
+.env
+/source_data/*.xlsx
