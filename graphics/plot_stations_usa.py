@@ -3,9 +3,15 @@ import geopandas as gpd
 import plotly.express as px
 from shapely.geometry import Point, Polygon
 from geovoronoi import voronoi_regions_from_coords, points_to_coords
+from data.get_climate_data import get_stations_data
+
 
 # 1. Cargar datos de las estaciones
-df = pd.read_csv("stations.csv")
+df = get_stations_data()
+
+df.to_excel('stations.xlsx')
+
+df = df.reset_index(drop=True)
 
 # 2. Convertir a GeoDataFrame con coordenadas WGS84
 points = [Point(xy) for xy in zip(df['longitude'], df['latitude'])]

@@ -46,6 +46,5 @@ def get_usda_quick_stats(api_key, source_desc="SURVEY", sector_desc="CROPS", gro
     except requests.exceptions.RequestException as e:
         print(f"Error al llamar a la API: {e}")
         return None
-
-# Ejemplo de uso:
+    
 

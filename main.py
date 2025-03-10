@@ -1,12 +1,14 @@
 from data.get_scan_data import get_usda_stations, filter_scan_data, get_usda_weather_data
 from data.get_usda_data import get_usda_quick_stats
-from eda.years_histogram import plot_years_histogram, plot_crops_states
+from eda.years_histogram import plot_years_histogram, plot_crops_states, filter_top_states
+from graphics.plot_states import plot_selected_states
 import pandas as pd
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
+source_data_directory = 'source_data'
 '''
 stations_data = get_usda_stations(networks="SNTL", bbox="-120,35,-110,40")
 stations_df = filter_scan_data(stations_data)
@@ -23,6 +25,8 @@ print(weather_df)
 Estados con datos disponibles: ['AL', 'AR', 'AZ', 'CA', 'CO', 'DE', 'FL', 'GA', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MD', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'WA', 'WI', 'WV', 'WY']
 
 Estados sin datos disponibles: ['AS', 'CT', 'GU', 'HI', 'MA', 'ME', 'MP', 'NH', 'NV', 'PR', 'RI', 'VI', 'VT']
+
+'''
 
 '''
 # Lista de códigos de estado correctos
@@ -42,7 +46,6 @@ state_dict = {
 
 # Obtener API Key desde variables de entorno
 usda_api_key = os.environ.get("USDA_API_KEY")
-source_data_directory = 'source_data'
 
 # Listas para almacenar los estados con y sin datos
 states_with_data = []
@@ -75,12 +78,17 @@ else:
 print("\nEstados con datos disponibles:", states_with_data)
 print("\nEstados sin datos disponibles:", states_without_data)
 
+'''
 
 file_path = f'{source_data_directory}/crop_yield.csv'
 
 # Cargar la hoja de datos
-xls = pd.ExcelFile(file_path)
-df = pd.read_excel(xls, sheet_name="Sheet1")
+#xls = pd.ExcelFile(file_path)
+df = pd.read_csv(file_path)
 
 ##plot_years_histogram(df)
-plot_crops_states(df)
+#plot_crops_states(df)
+df_filtered = filter_top_states(df)
+plot_selected_states(df_filtered)
+#print("Estados con más de 2000 registros:", df_filtered)
+    

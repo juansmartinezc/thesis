@@ -1,4 +1,5 @@
 /plot_venv/*
+/venv/*
 results/*
 /excel/*
 .env
