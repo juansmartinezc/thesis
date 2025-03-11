@@ -1,7 +1,7 @@
 from data.get_scan_data import get_usda_stations, filter_scan_data, get_usda_weather_data
 from data.get_usda_data import get_usda_quick_stats
 from eda.years_histogram import plot_years_histogram, plot_crops_states, filter_top_states
-from graphics.plot_states import plot_selected_states
+from graphics.plot_states import plot_states_with_filtered_stations
 import pandas as pd
 import os
 from dotenv import load_dotenv
@@ -89,6 +89,9 @@ df = pd.read_csv(file_path)
 ##plot_years_histogram(df)
 #plot_crops_states(df)
 df_filtered = filter_top_states(df)
-plot_selected_states(df_filtered)
+df_stations = pd.read_excel('stations.xlsx')
+
+# Llamar a la función con los datos filtrados
+plot_states_with_filtered_stations(df_filtered, df_stations)
 #print("Estados con más de 2000 registros:", df_filtered)
     

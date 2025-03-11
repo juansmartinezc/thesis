@@ -47,7 +47,6 @@ def filter_top_states(df):
     # Filtrar los estados que tienen más de 2000 registros
     states_with_enough_data = state_counts[state_counts > 2000].to_dict()
     
-    print(states_with_enough_data)
     # Filtrar el dataframe original para incluir solo esos estados
     # Mostrar los estados que cumplen con el criterio
     return states_with_enough_data

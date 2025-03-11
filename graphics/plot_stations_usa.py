@@ -9,7 +9,7 @@ from data.get_climate_data import get_stations_data
 # 1. Cargar datos de las estaciones
 df = get_stations_data()
 
-df.to_excel('stations.xlsx')
+#df.to_excel('stations.xlsx')
 
 df = df.reset_index(drop=True)
 
@@ -28,7 +28,7 @@ gdf_usa = gdf_usa.to_crs("EPSG:4326")
 # 5. Unir todas las geometrías en una sola (si son varios polígonos)
 #    - Esto devuelve un shapely.MultiPolygon o Polygon, según el caso.
 usa_polygon = gdf_usa.unary_union
-
+'''
 # 6. Calcular polígonos Voronoi sobre el polígono de EE.UU.
 region_polys, region_pts = voronoi_regions_from_coords(
     points_to_coords(points),
@@ -72,7 +72,7 @@ fig.update_traces(
     marker_line_color='black',
     showscale=False
 )
-
+'''
 # Añadir las estaciones
 fig.add_scattermapbox(
     lat=df['latitude'],
