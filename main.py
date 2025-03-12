@@ -1,7 +1,7 @@
 from data.get_scan_data import get_usda_stations, filter_scan_data, get_usda_weather_data
 from data.get_usda_data import get_usda_quick_stats
 from eda.years_histogram import plot_years_histogram, plot_crops_states, filter_top_states
-from graphics.plot_states import plot_states_with_filtered_stations
+from graphics.plot_states import plot_states_with_filtered_stations, plot_selected_states, plot_states_with_filtered_stations_voronoi
 import pandas as pd
 import os
 from dotenv import load_dotenv
@@ -9,18 +9,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 source_data_directory = 'source_data'
-'''
 stations_data = get_usda_stations(networks="SNTL", bbox="-120,35,-110,40")
 stations_df = filter_scan_data(stations_data)
-station_1 = stations_df.loc[0,:]
-print(station_1)
-stationTriplet = station_1['stationTriplet']
-elements="TMAX,TMIN,PRCP"
-beginDate = station_1['beginDate']
-endDate = station_1['endDate']
-weather_df = get_usda_weather_data(stationTriplet, elements, beginDate, endDate)
-print(weather_df)
-'''
+#station_1 = stations_df.loc[0,:]
+#print(station_1)
+#stationTriplet = station_1['stationTriplet']
+#elements="TMAX,TMIN,PRCP"
+#beginDate = station_1['beginDate']
+#endDate = station_1['endDate']
+#weather_df = get_usda_weather_data(stationTriplet, elements, beginDate, endDate)
+#print(weather_df)
+
 '''
 Estados con datos disponibles: ['AL', 'AR', 'AZ', 'CA', 'CO', 'DE', 'FL', 'GA', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MD', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'WA', 'WI', 'WV', 'WY']
 
@@ -28,7 +27,6 @@ Estados sin datos disponibles: ['AS', 'CT', 'GU', 'HI', 'MA', 'ME', 'MP', 'NH', 
 
 '''
 
-'''
 # Lista de códigos de estado correctos
 state_dict = {
     "AL": "Alabama", "AR": "Arkansas", "AZ": "Arizona", "CA": "California",
@@ -78,7 +76,6 @@ else:
 print("\nEstados con datos disponibles:", states_with_data)
 print("\nEstados sin datos disponibles:", states_without_data)
 
-'''
 
 file_path = f'{source_data_directory}/crop_yield.csv'
 
@@ -86,12 +83,14 @@ file_path = f'{source_data_directory}/crop_yield.csv'
 #xls = pd.ExcelFile(file_path)
 df = pd.read_csv(file_path)
 
-##plot_years_histogram(df)
-#plot_crops_states(df)
+plot_years_histogram(df)
+plot_crops_states(df)
 df_filtered = filter_top_states(df)
 df_stations = pd.read_excel('stations.xlsx')
-
+plot_selected_states(df_filtered)
 # Llamar a la función con los datos filtrados
 plot_states_with_filtered_stations(df_filtered, df_stations)
+plot_states_with_filtered_stations_voronoi(df_filtered, df_stations)
+#plot_states_with_filtered_stations_voronoi(df_filtered, df_stations)
 #print("Estados con más de 2000 registros:", df_filtered)
     
