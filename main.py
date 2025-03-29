@@ -50,6 +50,7 @@ states_with_data = []
 states_without_data = []
 dfs = []
 
+'''
 # Iterar sobre los estados y obtener los datos
 for state_code, state_name in state_dict.items():
     print(f"Llamando API para: {state_name} ({state_code})")
@@ -76,7 +77,7 @@ else:
 print("\nEstados con datos disponibles:", states_with_data)
 print("\nEstados sin datos disponibles:", states_without_data)
 
-
+'''
 file_path = f'{source_data_directory}/crop_yield.csv'
 
 # Cargar la hoja de datos

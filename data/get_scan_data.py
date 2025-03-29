@@ -37,7 +37,7 @@ def filter_scan_data(stations_df):
     stations_df = stations_df[stations_df['networkCode'] == 'SCAN'] 
     return stations_df
 
-def get_usda_weather_data(station_triplets, elements, begin_date, end_date):
+def get_usda_weather_data(station_triplets, elements, begin_date, duration):
     """
     Llama a la API del USDA para obtener datos meteorológicos.
 
@@ -55,7 +55,7 @@ def get_usda_weather_data(station_triplets, elements, begin_date, end_date):
         "stationTriplets": station_triplets,
         "elements": elements,
         "beginDate": begin_date,
-        "endDate": end_date
+        "duration": duration
     }
 
     try:

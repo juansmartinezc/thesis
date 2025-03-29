@@ -6,14 +6,22 @@ def get_stations_data():
     stations_df = filter_scan_data(stations_data)
     stations_df.to_csv(f"{stations_directory}/stations.csv")
     return stations_df
-    '''
-    station_1 = stations_df.loc[0,:]
-    print(station_1)
-    stationTriplet = station_1['stationTriplet']
-    elements="TMAX,TMIN,PRCP"
-    beginDate = station_1['beginDate']
-    endDate = station_1['endDate']
-    weather_df = get_usda_weather_data(stationTriplet, elements, beginDate, endDate)
-    print(weather_df)
-    # Ejemplo de uso:
-    '''
+
+def get_station_data(stations_df, duration, elements = "TMAX,TMIN,PREC"):
+    results = []
+    counter = 1
+    for station in stations_df.itertuples(index=True):
+        station_triplet = station.stationTriplet
+        station_begin_date = station.beginDate
+        #station_begin_date = "2024-02-02"
+        weather_list = get_usda_weather_data(station_triplet, elements, station_begin_date, duration)
+        station_data = {
+            "stationTriplet": station_triplet,
+            "latitude": station.latitude,
+            "longitude": station.longitude,
+            "data": weather_list[0]['data']  # Esto debería ser la lista de elementos como TMAX, TMIN, PRCP
+        }
+        results.append(station_data)
+    return results
+    #print(weather_df)
+    
