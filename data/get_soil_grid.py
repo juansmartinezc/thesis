@@ -19,132 +19,84 @@ lat_grid, lon_grid = np.meshgrid(lat_vals, lon_vals)
 # Conversion a listas 1D de lat y lon
 coordinates = list(zip(lat_grid.ravel(), lon_grid.ravel()))
 
-def get_soil_data(lat, lon, max_retries=5):
+def get_soil_data(lat, lon, max_retries=5, elements=None):
     """
-    Obtiene datos de 'silt' (0-30 cm) de la API de SoilGrids.
-    Implementa reintentos con backoff si encuentra un error 429 (Too Many Requests).
+    Obtiene datos de suelo (0-30 cm) desde la API de SoilGrids para los elementos solicitados.
     """
-    url = f"https://rest.isric.org/soilgrids/v2.0/properties/query?lon={lon}&lat={lat}&property=silt"
+
+    if elements is None:
+        elements = ["silt"]  # valor por defecto
+
+    url = "https://rest.isric.org/soilgrids/v2.0/properties/query"
+
+    params = {
+        "lat": lat,
+        "lon": lon,
+        "property": elements
+    }
+
+    delay = 2
     
-    delay = 2  # segundos de espera inicial si recibimos 429
-    for attempt in range(1, max_retries+1):
+    for attempt in range(1, max_retries + 1):
         try:
-            response = requests.get(url, timeout=10)
-            
+            response = requests.get(url, params=params, timeout=10)
+
             if response.status_code == 200:
-                # Petición exitosa
                 data = response.json()
                 layers = data.get("properties", {}).get("layers", [])
-                
-                # Hallar la capa 'silt'
-                silt_layer = next((layer for layer in layers if layer["name"] == "silt"), None)
-                if silt_layer:
-                    depths = silt_layer.get("depths", [])
-                    mean_values = []
+
+                result = {"latitude": lat, "longitude": lon}
+
+                for element in elements:
+                    layer = next((layer for layer in layers if layer["name"] == element), None)
+                    if layer:
+                        depths = layer.get("depths", [])
+                        mean_values = [
+                            d["values"].get("mean", None)
+                            for d in depths
+                            if d["range"]["top_depth"] < 30 and d["range"]["bottom_depth"] > 0
+                        ]
+                        mean_values = [v for v in mean_values if v is not None]
+
+                        if mean_values:
+                            avg_val = round(sum(mean_values) / len(mean_values), 2)
+                        else:
+                            avg_val = None
+                    else:
+                        avg_val = None
                     
-                    # Recorrer subcapas y filtrar las que caen dentro de 0-30 cm
-                    for d in depths:
-                        top = d["range"]["top_depth"]
-                        bottom = d["range"]["bottom_depth"]
-                        if bottom > 0 and top < 30:  # rango 0-30 cm
-                            val = d["values"].get("mean", None)
-                            if val is not None:
-                                mean_values.append(val)
-                    
-                    if mean_values:
-                        avg_silt = round(sum(mean_values)/len(mean_values), 2)
-                        return {"lat": lat, "lon": lon, "silt_0_30cm": avg_silt}
-                
-                # Si no hay capa silt o está vacía, devolver None
-                return {"lat": lat, "lon": lon, "silt_0_30cm": None}
-            
+                    result[f"{element}_0_30cm"] = avg_val
+
+                return pd.DataFrame([result])
+
             elif response.status_code == 429:
-                # Límite de peticiones (rate limit)
-                print(f"Recibido 429 (Too Many Requests) en intento {attempt}/{max_retries} para {lat}, {lon}")
-                
-                # Chequear cabecera Retry-After (si la hay)
+                print(f"429 Too Many Requests en intento {attempt}/{max_retries} para {lat}, {lon}")
                 retry_after = response.headers.get("Retry-After")
-                if retry_after is not None:
+                if retry_after:
                     try:
                         delay = int(retry_after)
                     except ValueError:
-                        pass  # Si no es un entero, usamos el delay actual
-                
+                        pass
                 if attempt < max_retries:
-                    print(f"Esperando {delay} seg antes de reintentar...")
+                    print(f"Esperando {delay} segundos antes de reintentar...")
                     time.sleep(delay)
-                    # Exponential backoff: duplicamos el tiempo de espera
                     delay *= 2
                 else:
-                    print("Se alcanzó el número máximo de reintentos con 429.")
-                    return {"lat": lat, "lon": lon, "silt_0_30cm": None}
-            
+                    print("Demasiados intentos fallidos.")
+                    return pd.DataFrame([{"latitude": lat, "longitude": lon, **{f"{e}_0_30cm": None for e in elements}}])
+
             else:
-                print(f"Respuesta inesperada: {response.status_code} (Intento {attempt}/{max_retries}).")
-                # Podemos imprimir el contenido para debug:
-                print(response.text)
-                
+                print(f"Error {response.status_code} - {response.text}")
                 if attempt < max_retries:
                     time.sleep(2)
                 else:
-                    return {"lat": lat, "lon": lon, "silt_0_30cm": None}
-        
+                    return pd.DataFrame([{"latitude": lat, "longitude": lon, **{f"{e}_0_30cm": None for e in elements}}])
+
         except requests.exceptions.RequestException as e:
-            # Cualquier otro error de conexión
-            print(f"Excepción (Intento {attempt}/{max_retries}) para {lat}, {lon}: {e}")
+            print(f"Error de conexión en intento {attempt}/{max_retries}: {e}")
             if attempt < max_retries:
                 time.sleep(2)
             else:
-                return {"lat": lat, "lon": lon, "silt_0_30cm": None}
-    
-    # Si no se retornó nada durante los reintentos
-    return {"lat": lat, "lon": lon, "silt_0_30cm": None}
+                return pd.DataFrame([{"latitude": lat, "longitude": lon, **{f"{e}_0_30cm": None for e in elements}}])
 
-def main():
-    # Nombre del archivo de caché
-    cached_file = "soil_data_iowa.csv"
-    
-    # 3. Comprobar si ya tenemos un CSV con resultados anteriores
-    if os.path.exists(cached_file):
-        df_cache = pd.read_csv(cached_file)
-    else:
-        df_cache = pd.DataFrame(columns=["lat", "lon", "silt_0_30cm"])
-    
-    # Lista final donde iremos acumulando todos los datos
-    all_data = []
-    
-    # Convertimos df_cache en una lista/dict para buscar rápido
-    # (Podríamos usar un set de tuplas (lat,lon), pero con float hay que tener cuidado con equivalencias)
-    existing_coords = set(zip(df_cache["lat"].values, df_cache["lon"].values))
-    
-    for (lat, lon) in coordinates:
-        # Ver si lat-lon ya están en caché
-        if (lat, lon) in existing_coords:
-            # Filtrar la fila específica en df_cache
-            row = df_cache[(df_cache["lat"] == lat) & (df_cache["lon"] == lon)].iloc[0]
-            silt_val = row["silt_0_30cm"]
-            data_dict = {"lat": lat, "lon": lon, "silt_0_30cm": silt_val}
-        else:
-            # Llamar a la API
-            data_dict = get_soil_data(lat, lon, max_retries=5)
-            
-            # Actualizar df_cache con la nueva fila
-            new_row = pd.DataFrame([data_dict])
-            df_cache = pd.concat([df_cache, new_row], ignore_index=True)
-            # Guardar en CSV cada vez que obtenemos un dato nuevo
-            df_cache.to_csv(cached_file, index=False)
-            
-            # Espera fija tras cada request exitoso o fallido para no saturar
-            time.sleep(3)
-        
-        all_data.append(data_dict)
-    
-    # Convertir la data final a DataFrame
-    final_df = pd.DataFrame(all_data)
-    
-    # Mostrar el resultado en pantalla
-    print("\n--- RESULTADOS FINALES ---")
-    print(final_df)
-
-if __name__ == "__main__":
-    main()
+    return pd.DataFrame([{"latitude": lat, "longitude": lon, **{f"{e}_0_30cm": None for e in elements}}])

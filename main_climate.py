@@ -3,6 +3,7 @@ from data.get_scan_data import get_usda_stations, filter_scan_data, get_usda_wea
 from data.get_usda_data import get_usda_quick_stats
 from eda.years_histogram import plot_years_histogram, plot_crops_states, filter_top_states
 from graphics.plot_states import plot_states_with_filtered_stations, plot_selected_states, plot_states_with_filtered_stations_voronoi
+from data.get_soil_grid import get_soil_data
 import pandas as pd
 import os
 from dotenv import load_dotenv
@@ -46,7 +47,7 @@ for station_data in stations_data_list:
         df_temp = df_temp.rename(columns={'value': unique_column_name})
         dfs.append(df_temp)
 
-        print(f"✓ Añadido: {unique_column_name}")
+        #print(f"✓ Añadido: {unique_column_name}")
 
     if not dfs:
         print(f"⚠️ No hay datos válidos para la estación {stationTriplet}, se omite.")
@@ -67,5 +68,26 @@ for station_data in stations_data_list:
     dfs_result.append(weather_df)
 
 # Concatenar todos los resultados
-result = pd.concat(dfs_result, ignore_index=True)
-result.to_csv('result.csv', index=False)
+sowing_months = pd.concat(dfs_result, ignore_index=True)
+sowing_months.to_csv('sowing_months.csv', index=False)
+unique_coords = sowing_months.groupby('stationTriplet')[['latitude', 'longitude']].first().reset_index()
+soils_list = []
+
+for idx, sowing_month in unique_coords.iterrows():
+    latitude = sowing_month['latitude']
+    longitude = sowing_month['longitude']
+    print(f"latitude: {latitude}")
+    print(f"longitude: {longitude}")
+    
+    soil_df = get_soil_data(latitude, longitude, max_retries=5, elements = ["phh2o", "ocd", "cec", "sand", "silt", "clay"])
+    
+    if soil_df is not None and not soil_df.empty:
+        soils_list.append(soil_df)
+
+# Concatenar todos los resultados en un único DataFrame
+soils_df = pd.concat(soils_list, ignore_index=True)
+print(soils_df)
+
+soils_df.to_csv('soils_df.csv')
+result_df = soils_df.merge(sowing_months, how = 'inner', on = ['latitude', 'longitude'])
+result_df.to_csv('result.csv', index=False)
