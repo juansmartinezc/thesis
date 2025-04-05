@@ -1,5 +1,9 @@
 import requests
 import pandas as pd
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 def get_usda_stations(networks=None, station_ids=None, bbox=None):
     """
@@ -50,7 +54,7 @@ def get_usda_weather_data(station_triplets, elements, begin_date, duration):
     Retorna:
         dict: Respuesta en formato JSON con los datos meteorológicos.
     """
-    url = "https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/data"
+    url = os.environ.get("USDA_API_URL")
     params = {
         "stationTriplets": station_triplets,
         "elements": elements,

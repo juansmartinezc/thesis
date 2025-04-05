@@ -1,10 +1,10 @@
 from data.get_scan_data import get_usda_stations, filter_scan_data, get_usda_weather_data
 
-stations_directory = 'results'
+source_data_directory = 'source_data'
 def get_stations_data():
     stations_data = get_usda_stations(networks="SNTL", bbox="-120,35,-110,40")
     stations_df = filter_scan_data(stations_data)
-    stations_df.to_csv(f"{stations_directory}/stations.csv")
+    stations_df.to_csv(f"{source_data_directory}/stations.csv")
     return stations_df
 
 def get_station_data(stations_df, duration, elements = "TMAX,TMIN,PREC"):
@@ -24,9 +24,8 @@ def get_station_data(stations_df, duration, elements = "TMAX,TMIN,PREC"):
         }
         results.append(station_data)
         counter = counter + 1
-        #if counter == 3:
-        #    break
+        if counter == 3:
+            break
         #print(f"los resultados son: {results}")
     return results
-    #print(weather_df)
     
