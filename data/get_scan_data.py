@@ -5,7 +5,7 @@ import os
 
 load_dotenv()
 
-def get_usda_stations(networks=None, station_ids=None, bbox=None):
+def get_usda_stations(networks=None, station_ids=None):
     """
     Llama a la API del USDA para obtener estaciones de monitoreo.
 
@@ -17,15 +17,13 @@ def get_usda_stations(networks=None, station_ids=None, bbox=None):
     Retorna:
         dict: Respuesta en formato JSON con los datos de las estaciones.
     """
-    url = "https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/stations"
+    url = f"{os.environ.get("USDA_API_URL")}/stations"
     params = {}
 
     if networks:
         params["networkCds"] = networks
     if station_ids:
         params["stationIds"] = station_ids
-    if bbox:
-        params["bbox"] = bbox
 
     try:
         response = requests.get(url, params=params)
@@ -54,7 +52,7 @@ def get_usda_weather_data(station_triplets, elements, begin_date, duration):
     Retorna:
         dict: Respuesta en formato JSON con los datos meteorológicos.
     """
-    url = os.environ.get("USDA_API_URL")
+    url = f"{os.environ.get("USDA_API_URL")}/data"
     params = {
         "stationTriplets": station_triplets,
         "elements": elements,

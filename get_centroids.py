@@ -6,8 +6,11 @@ import geopandas as gpd
 from scipy.spatial import Voronoi
 from shapely.geometry import Polygon
 from utils.states_codes import state_fips_to_abbr, state_alpha_to_fips
+from dotenv import load_dotenv
 
-source_data_directory = 'source_data'
+load_dotenv()
+
+source_data_directory = os.environ.get("SOURCE_DATA_DIRECTORY")
 
 # 1) Leer el shapefile de condados
 counties_gdf = gpd.read_file("shape_files/country/cb_2018_us_county_500k.shp")  # Ejemplo

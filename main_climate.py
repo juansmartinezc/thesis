@@ -3,8 +3,11 @@ import pandas as pd
 from dotenv import load_dotenv
 from data.get_climate_data import get_stations_data, get_station_data
 from data.get_soil_grid import get_soil_data
+from dotenv import load_dotenv
 
-source_data_directory = 'source_data'
+load_dotenv()
+
+source_data_directory = os.environ.get("SOURCE_DATA_DIRECTORY")
 
 def create_climate_dateframe(stations_data_list): 
     dfs_result = []

@@ -1,16 +1,22 @@
-import requests
-from datetime import datetime
 import time
+import requests
 import pandas as pd
-df = pd.read_csv('final_df.csv')
+from datetime import datetime
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+source_directory = os.environ.get('SOURCE_DATA_DIRECTORY')
+
+monthly_historical_climate_soil_data_by_station = pd.read_csv(f'{source_directory}/monthly_historical_climate_soil_data_by_station.csv')
 
 # Filtrar solo los meses de abril (4) a octubre (10)
 months_of_interest = list(range(4, 11))
-filtered_df = df[df['month'].isin(months_of_interest)].reset_index(drop=True)
+filtered_df = monthly_historical_climate_soil_data_by_station[monthly_historical_climate_soil_data_by_station['month'].isin(months_of_interest)].reset_index(drop=True)
 
 # Guardar el resultado en un nuevo archivo
-filtered_path = "filtered_cornbelt_apr_oct.csv"
-#filtered_df.to_csv(filtered_path, index=False)
+filtered_path = "monthly_historical_apr_oct_climate_soil_data_by_station.csv"
+filtered_df.to_csv(f'{source_directory}/filtered_path', index=False)
 
 
 # Obtener combinaciones únicas de lat/lon/año
@@ -19,11 +25,14 @@ locations = filtered_df[['lat_centroid', 'lon_centroid', 'year']].drop_duplicate
 # Definir los meses de interés (abril a octubre)
 months = [f"{m:02d}" for m in range(4, 11)]
 
+nasa_url = os.environ.get('NASA_API_URL')
+parameters = "parameters=T2M_MAX,T2M_MIN,T2M,PRECTOTCORR&community=ag&"
+
 # Función para obtener datos mensuales de NASA POWER por año
 def get_nasa_data(lat, lon, year):
     url = (
-        f"https://power.larc.nasa.gov/api/temporal/monthly/point?"
-        f"parameters=T2M_MAX,T2M_MIN,T2M,PRECTOTCORR&community=ag&"
+        f"{nasa_url}"
+        f"{parameters}"
         f"longitude={lon}&latitude={lat}&start={year}&end={year}&format=JSON"
     )
     response = requests.get(url)
@@ -56,5 +65,5 @@ for _, row in locations.iterrows():
 
 # Convertir a DataFrame y guardar
 climate_df = pd.DataFrame(climate_data)
-climate_df.to_csv("nasa_climate_apr_oct.csv", index=False)
+climate_df.to_csv(f'{source_directory}/nasa_climate_apr_oct.csv', index=False)
 print("✅ Datos climáticos guardados en 'nasa_climate_apr_oct.csv'")

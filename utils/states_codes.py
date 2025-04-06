@@ -72,3 +72,17 @@ state_alpha_to_fips = {
     "PR": "72",   # Puerto Rico
     "VI": "78"    # Islas Vírgenes de EE. UU.
 }
+
+states_dict = {
+    "AL": "Alabama", "AR": "Arkansas", "AZ": "Arizona", "CA": "California",
+    "CO": "Colorado", "DE": "Delaware", "FL": "Florida", "GA": "Georgia",
+    "IA": "Iowa", "ID": "Idaho", "IL": "Illinois", "IN": "Indiana",
+    "KS": "Kansas", "KY": "Kentucky", "LA": "Louisiana", "MD": "Maryland",
+    "MI": "Michigan", "MN": "Minnesota", "MO": "Missouri", "MS": "Mississippi",
+    "MT": "Montana", "NC": "North Carolina", "ND": "North Dakota",
+    "NE": "Nebraska", "NJ": "New Jersey", "NM": "New Mexico",
+    "NY": "New York", "OH": "Ohio", "OK": "Oklahoma", "OR": "Oregon",
+    "PA": "Pennsylvania", "SC": "South Carolina", "SD": "South Dakota",
+    "TN": "Tennessee", "TX": "Texas", "UT": "Utah", "VA": "Virginia",
+    "WA": "Washington", "WI": "Wisconsin", "WV": "West Virginia", "WY": "Wyoming"
+}

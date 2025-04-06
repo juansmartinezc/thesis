@@ -1,6 +1,10 @@
 import pandas as pd
+import os
+from dotenv import load_dotenv
 
-source_data_directory = 'source_data'
+load_dotenv()
+
+source_data_directory = os.environ.get("SOURCE_DATA_DIRECTORY")
 counties_with_centroid = pd.read_csv(f'{source_data_directory}/counties_centroids_cornbelt.csv')
 stations_voronoi = pd.read_csv(f'{source_data_directory}/counties_usda_station.csv')
 

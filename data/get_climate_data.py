@@ -1,8 +1,13 @@
 from data.get_scan_data import get_usda_stations, filter_scan_data, get_usda_weather_data
+from dotenv import load_dotenv
+import os
 
-source_data_directory = 'source_data'
+load_dotenv()
+
+source_data_directory = os.environ.get("SOURCE_DATA_DIRECTORY")
+
 def get_stations_data():
-    stations_data = get_usda_stations(networks="SNTL", bbox="-120,35,-110,40")
+    stations_data = get_usda_stations(networks="SNTL")
     stations_df = filter_scan_data(stations_data)
     stations_df.to_csv(f"{source_data_directory}/stations.csv")
     return stations_df
