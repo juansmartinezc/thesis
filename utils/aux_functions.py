@@ -12,7 +12,7 @@ source_data_directory = os.environ.get("SOURCE_DATA_DIRECTORY")
 #source_data_directory = f"{base_dir} / {source_data_directory}"
 
 
-def create_climate_dateframe(stations_data_list): 
+def create_monthly_climate_data_by_scan_station(stations_data_list): 
     dfs_result = []
     for station_data in stations_data_list:
         stationTriplet = station_data['stationTriplet']
@@ -52,9 +52,12 @@ def create_climate_dateframe(stations_data_list):
         climate_df['latitude'] = latitude
         climate_df['longitude'] = longitude
         dfs_result.append(climate_df)
-    monthly_climate_data_by_station = pd.concat(dfs_result, ignore_index=True)
+    monthly_climate_data_by_scan_stations = pd.concat(dfs_result, ignore_index=True)
+    return monthly_climate_data_by_scan_stations
+
+def save_monthly_climate_data_by_scan_station(monthly_climate_data_by_scan_station): 
     os.makedirs('source_data', exist_ok=True)
-    monthly_climate_data_by_station.to_csv(f'{source_data_directory}/monthly_climate_data_by_station.csv', index=False)
-    return monthly_climate_data_by_station
+    monthly_climate_data_by_scan_station.to_csv(f'{source_data_directory}/monthly_climate_data_by_scan_station.csv', index=False)
+
 
 

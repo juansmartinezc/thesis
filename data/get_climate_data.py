@@ -9,11 +9,11 @@ source_data_directory = os.environ.get("SOURCE_DATA_DIRECTORY")
 
 def get_scan_stations_data():
     stations_data = get_usda_stations(networks="SNTL")
-    stations_df = filter_scan_data(stations_data)
-    return stations_df
+    scan_stations_df = filter_scan_data(stations_data)
+    return scan_stations_df
 
-def save_stations_data(stations_df):
-    stations_df.to_csv(f"{source_data_directory}/stations.csv")
+def save_scan_stations_data(scan_stations_df):
+    scan_stations_df.to_csv(f"{source_data_directory}/scan_stations.csv")
 
 def read_stations_data():
     stations_df = pd.read_csv(f"{source_data_directory}/stations.csv")
@@ -36,7 +36,7 @@ def get_station_data(stations_df, duration, elements = "TMAX,TMIN,PREC"):
         }
         results.append(station_data)
         counter = counter + 1
-        #if counter == 2:
+        #if counter == 10:
         #    break
         #print(f"los resultados son: {results}")
     return results

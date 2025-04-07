@@ -192,5 +192,5 @@ def assign_scan_station_to_cb_yield_counties(counties_cornbelt_wgs84, stations_d
     joined_single_geom.to_file(f"{shape_files}/counties_usda/counties_nearest_usda_station.shp")
 
     # Para CSV, debes quitar la geometría (por ejemplo joined.drop(columns="geometry"))
-    joined.drop(columns="geometry").to_csv(f"{source_data_directory}/counties_nearest_usda_station.csv", index=False)
+    joined.drop(columns="geometry").to_csv(f"{source_data_directory}/cornbelt_counties_nearest_usda_station.csv", index=False)
     return joined

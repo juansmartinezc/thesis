@@ -121,19 +121,20 @@ def get_soil_data(
         **{f"{e}": None for e in elements}
     }])
 
-def get_soil_dataframe(sowing_month, station_coords, elements = ["phh2o", "ocd", "cec", "sand", "silt", "clay"]):
+def get_soil_scan_stations_dataframe(station_coords, elements = ["phh2o", "ocd", "cec", "sand", "silt", "clay"]):
     soils_list = []
-    for idx, sowing_month in station_coords.iterrows():
-        latitude = sowing_month['latitude']
-        longitude = sowing_month['longitude']
+    for idx, station_coord in station_coords.iterrows():
+        latitude = station_coord['latitude']
+        longitude = station_coord['longitude']
         soil_df = get_soil_data(latitude, longitude, elements, depth_range = (15,30), max_retries=5) 
+        soil_df['stationTriplet'] = station_coord['stationTriplet']
         if soil_df is not None and not soil_df.empty:
             soils_list.append(soil_df)
     # Concatenar todos los resultados en un único DataFrame
-    soil_data_by_station = pd.concat(soils_list, ignore_index=True)
-    return soil_data_by_station
+    soil_data_by_scan_stations = pd.concat(soils_list, ignore_index=True)
+    return soil_data_by_scan_stations
 
 
-def save_soil_dataframe(soil_data_by_station):
+def save_soil_scan_stations_dataframe(soil_data_by_scan_stations):
     os.makedirs('source_data', exist_ok=True)
-    soil_data_by_station.to_csv(f'{source_data_directory}/soil_data_by_station.csv', index=False)
+    soil_data_by_scan_stations.to_csv(f'{source_data_directory}/soil_data_by_scan_stations.csv', index=False)
