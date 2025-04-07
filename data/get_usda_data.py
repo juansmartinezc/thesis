@@ -1,6 +1,9 @@
 import requests
 import pandas as pd
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 def get_usda_quick_stats(api_key, source_desc="SURVEY", sector_desc="CROPS", group_desc="FIELD CROPS",
                          commodity_desc="CORN", statisticcat_desc="YIELD", year_ge=2000,
@@ -24,7 +27,7 @@ def get_usda_quick_stats(api_key, source_desc="SURVEY", sector_desc="CROPS", gro
     Retorna:
         dict: Respuesta en formato JSON con los datos agrícolas.
     """
-    url = "https://quickstats.nass.usda.gov/api/api_GET/"
+    url = os.environ.get("USDA_QUICK_STATS_URL")
     params = {
         "key": api_key,
         "source_desc": source_desc,

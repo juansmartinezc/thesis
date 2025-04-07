@@ -17,7 +17,8 @@ def get_usda_stations(networks=None, station_ids=None):
     Retorna:
         dict: Respuesta en formato JSON con los datos de las estaciones.
     """
-    url = f"{os.environ.get("USDA_API_URL")}/stations"
+    url = f"{os.environ.get('USDA_API_URL')}/stations"
+
     params = {}
 
     if networks:
@@ -52,7 +53,7 @@ def get_usda_weather_data(station_triplets, elements, begin_date, duration):
     Retorna:
         dict: Respuesta en formato JSON con los datos meteorológicos.
     """
-    url = f"{os.environ.get("USDA_API_URL")}/data"
+    url = f"{os.environ.get('USDA_API_URL')}/data"
     params = {
         "stationTriplets": station_triplets,
         "elements": elements,

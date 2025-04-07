@@ -1,15 +1,22 @@
 from data.get_scan_data import get_usda_stations, filter_scan_data, get_usda_weather_data
 from dotenv import load_dotenv
 import os
+import pandas as pd
 
 load_dotenv()
 
 source_data_directory = os.environ.get("SOURCE_DATA_DIRECTORY")
 
-def get_stations_data():
+def get_scan_stations_data():
     stations_data = get_usda_stations(networks="SNTL")
     stations_df = filter_scan_data(stations_data)
+    return stations_df
+
+def save_stations_data(stations_df):
     stations_df.to_csv(f"{source_data_directory}/stations.csv")
+
+def read_stations_data():
+    stations_df = pd.read_csv(f"{source_data_directory}/stations.csv")
     return stations_df
 
 def get_station_data(stations_df, duration, elements = "TMAX,TMIN,PREC"):
@@ -29,7 +36,7 @@ def get_station_data(stations_df, duration, elements = "TMAX,TMIN,PREC"):
         }
         results.append(station_data)
         counter = counter + 1
-        if counter == 3:
+        if counter == 2:
             break
         #print(f"los resultados son: {results}")
     return results

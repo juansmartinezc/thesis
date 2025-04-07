@@ -73,6 +73,7 @@ state_alpha_to_fips = {
     "VI": "78"    # Islas Vírgenes de EE. UU.
 }
 
+##Dictionary with the name and the code 
 states_dict = {
     "AL": "Alabama", "AR": "Arkansas", "AZ": "Arizona", "CA": "California",
     "CO": "Colorado", "DE": "Delaware", "FL": "Florida", "GA": "Georgia",
