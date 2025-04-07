@@ -36,8 +36,8 @@ def get_station_data(stations_df, duration, elements = "TMAX,TMIN,PREC"):
         }
         results.append(station_data)
         counter = counter + 1
-        if counter == 2:
-            break
+        #if counter == 2:
+        #    break
         #print(f"los resultados son: {results}")
     return results
     

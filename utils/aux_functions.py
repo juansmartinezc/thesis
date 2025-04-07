@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from data.get_soil_grid import get_soil_data
+from data.get_soil_data import get_soil_data
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -10,8 +10,6 @@ source_data_directory = os.environ.get("SOURCE_DATA_DIRECTORY")
 
 #base_dir = Path(__file__).resolve().parent.parent
 #source_data_directory = f"{base_dir} / {source_data_directory}"
-
-
 
 
 def create_climate_dateframe(stations_data_list): 
@@ -59,16 +57,4 @@ def create_climate_dateframe(stations_data_list):
     monthly_climate_data_by_station.to_csv(f'{source_data_directory}/monthly_climate_data_by_station.csv', index=False)
     return monthly_climate_data_by_station
 
-def get_soil_dataframe(sowing_month, station_coords, elements = ["phh2o", "ocd", "cec", "sand", "silt", "clay"]):
-    soils_list = []
-    for idx, sowing_month in station_coords.iterrows():
-        latitude = sowing_month['latitude']
-        longitude = sowing_month['longitude']
-        soil_df = get_soil_data(latitude, longitude, elements, depth_range = (15,30), max_retries=5) 
-        if soil_df is not None and not soil_df.empty:
-            soils_list.append(soil_df)
-    # Concatenar todos los resultados en un único DataFrame
-    soil_data_by_station = pd.concat(soils_list, ignore_index=True)
-    os.makedirs('source_data', exist_ok=True)
-    soil_data_by_station.to_csv(f'{source_data_directory}/soil_data_by_station.csv', index=False)
-    return soil_data_by_station
+

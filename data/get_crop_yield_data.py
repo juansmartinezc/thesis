@@ -31,7 +31,6 @@ def get_crop_yield():
             states_without_data.append(state_code)  # Agregar a la lista de estados sin datos
     print("Datos recopilados exitosamente.")
     crop_yield_df = pd.concat(crop_yield_data, ignore_index=True)
-    
     print("\nEstados con datos disponibles:", states_with_data)
     print("\nEstados sin datos disponibles:", states_without_data)
     return crop_yield_df

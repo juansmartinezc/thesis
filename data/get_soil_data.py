@@ -4,6 +4,11 @@ import requests
 import numpy as np
 import pandas as pd
 from typing import Iterable, Tuple, List
+from dotenv import load_dotenv
+
+load_dotenv()
+
+source_data_directory = os.environ.get("SOURCE_DATA_DIRECTORY")
 
 def get_soil_data(
     lat: float,
@@ -115,3 +120,20 @@ def get_soil_data(
         "longitude": lon,
         **{f"{e}": None for e in elements}
     }])
+
+def get_soil_dataframe(sowing_month, station_coords, elements = ["phh2o", "ocd", "cec", "sand", "silt", "clay"]):
+    soils_list = []
+    for idx, sowing_month in station_coords.iterrows():
+        latitude = sowing_month['latitude']
+        longitude = sowing_month['longitude']
+        soil_df = get_soil_data(latitude, longitude, elements, depth_range = (15,30), max_retries=5) 
+        if soil_df is not None and not soil_df.empty:
+            soils_list.append(soil_df)
+    # Concatenar todos los resultados en un único DataFrame
+    soil_data_by_station = pd.concat(soils_list, ignore_index=True)
+    return soil_data_by_station
+
+
+def save_soil_dataframe(soil_data_by_station):
+    os.makedirs('source_data', exist_ok=True)
+    soil_data_by_station.to_csv(f'{source_data_directory}/soil_data_by_station.csv', index=False)
