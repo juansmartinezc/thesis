@@ -3,7 +3,7 @@ import time
 import requests
 import pandas as pd
 from dotenv import load_dotenv
-from data.get_nasa import get_climate_missing_values
+from data.get_nasa import get_climate_missing_values, save_climate_missing_values
 from data.get_crop_yield_data import get_crop_yield
 from data.get_soil_data import get_soil_scan_stations_dataframe, save_soil_scan_stations_dataframe
 from utils.aux_functions import create_monthly_climate_data_by_scan_station, save_monthly_climate_data_by_scan_station
@@ -86,13 +86,13 @@ months_of_interest = list(range(4, 11))
 monthly_historical_climate_soil_data_by_scan_stations_apr_sept = monthly_historical_climate_soil_data_by_scan_stations[monthly_historical_climate_soil_data_by_scan_stations['month'].isin(months_of_interest)].reset_index(drop=True)
 
 # Guardar el resultado en un nuevo archivo
-filtered_path = "monthly_historical_climate_soil_data_by_scan_stations_apr_sept.csv"
-monthly_historical_climate_soil_data_by_scan_stations_apr_sept.to_csv(f'{source_data_directory}/filtered_path', index=False)
+monthly_historical_climate_soil_data_by_scan_stations_apr_sept.to_csv(f'{source_data_directory}/monthly_historical_climate_soil_data_by_scan_stations_apr_sept.csv', index=False)
 
 
 # Obtener combinaciones únicas de lat/lon/año
 locations = monthly_historical_climate_soil_data_by_scan_stations_apr_sept[['lat_centroid', 'lon_centroid', 'year']].drop_duplicates().head(3)
-
+locations.to_csv('locations.csv')
 
 
 climate_missing_values = get_climate_missing_values(locations)
+save_climate_missing_values(climate_missing_values)
