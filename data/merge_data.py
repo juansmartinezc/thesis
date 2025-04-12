@@ -15,8 +15,8 @@ def merge_monthly_scan_stations_with_soil(soil_data_by_station, monthly_climate_
 def save_monthly_climate_soil_data_by_station(monthly_climate_soil_data_by_station):
     monthly_climate_soil_data_by_station.to_csv(f'{source_data_directory}/monthly_climate_soil_data_by_station.csv', index=False)
 
-def merge_counties_crop_yield_with_scan_stations(cornbelt_yield_county_centroids, stations_voronoi):
-    crop_yield_usda_stations = cornbelt_yield_county_centroids.merge(right=stations_voronoi, on=["lat_centroid", "lon_centroid"])
+def merge_counties_crop_yield_with_scan_stations(cornbelt_yield_county_centroids, counties_nearest_usda_station):
+    crop_yield_usda_stations = cornbelt_yield_county_centroids.merge(right=counties_nearest_usda_station, on=["lat_centroid", "lon_centroid"])
     return crop_yield_usda_stations
 
 def save_crop_yield_scan_stations(crop_yield_scan_stations):

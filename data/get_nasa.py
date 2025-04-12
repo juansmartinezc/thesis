@@ -56,14 +56,14 @@ def get_climate_missing_values(df):
     # Filas con valores faltantes
     missing_mask = df[climate_cols].isnull().any(axis=1)
     locations = df[missing_mask][['lat_centroid', 'lon_centroid', 'year', 'month']].drop_duplicates()
-
+    locations.to_csv(f'{source_data_directory}/locations.csv')
     print(f"Total de ubicaciones únicas con faltantes: {len(locations)}")
 
     climate_data = []
 
     # Agrupar por coordenadas y año para consultar solo una vez por grupo
     grouped = locations.groupby(['lat_centroid', 'lon_centroid', 'year'])
-
+    
     for (lat, lon, year), group in grouped:
         months_needed = group['month'].tolist()
         print(f"→ Consultando ({lat}, {lon}) en {year} para meses: {months_needed}")
@@ -72,7 +72,7 @@ def get_climate_missing_values(df):
         if result:
             climate_data.extend(result)
 
-        time.sleep(1)  # Evitar saturar la API
+        #time.sleep(1)  # Evitar saturar la API
 
     # Si no hay datos devueltos, salir
     if not climate_data:
