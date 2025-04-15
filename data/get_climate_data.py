@@ -2,6 +2,7 @@ from data.get_scan_data import get_usda_stations, filter_scan_data, get_usda_wea
 from dotenv import load_dotenv
 import os
 import pandas as pd
+import logging
 
 load_dotenv()
 
@@ -19,25 +20,34 @@ def read_stations_data():
     stations_df = pd.read_csv(f"{source_data_directory}/stations.csv")
     return stations_df
 
-def get_station_data(stations_df, duration, elements = "TMAX,TMIN,PREC"):
+def get_station_data(stations_df, duration, elements="TMAX,TMIN,PREC"):
     results = []
-    counter = 1
-    for station in stations_df.itertuples(index=True):
-        print(f"consultando la estacion: {station}")
-        station_triplet = station.stationTriplet
-        station_begin_date = station.beginDate
-        #station_begin_date = "2024-02-02"
-        weather_list = get_usda_weather_data(station_triplet, elements, station_begin_date, duration)
-        station_data = {
-            "stationTriplet": station_triplet,
+
+    for station in stations_df.itertuples(index=False):
+        logging.info("Consultando estación %s", station.stationTriplet)
+        weather = get_usda_weather_data(
+            station.stationTriplet, elements, station.beginDate, duration
+        )
+
+        if not weather:
+            logging.warning("Sin datos para %s (respuesta vacía o error).", station.stationTriplet)
+            continue
+
+        # Asegúrate de qué estructura recibes
+        if isinstance(weather, list):
+            first = weather[0] if weather else {}
+        else:
+            first = weather
+
+        if "data" not in first or not first["data"]:
+            logging.warning("Respuesta sin 'data' para %s: %s", station.stationTriplet, first)
+            continue
+
+        results.append({
+            "stationTriplet": station.stationTriplet,
             "latitude": station.latitude,
             "longitude": station.longitude,
-            "data": weather_list[0]['data']  # Esto debería ser la lista de elementos como TMAX, TMIN, PRCP
-        }
-        results.append(station_data)
-        counter = counter + 1
-        #if counter == 10:
-        #    break
-        #print(f"los resultados son: {results}")
+            "data": first["data"],
+        })
+
     return results
-    

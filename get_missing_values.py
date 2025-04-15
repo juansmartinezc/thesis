@@ -16,11 +16,12 @@ filtered_df = monthly_historical_climate_soil_data_by_station[monthly_historical
 
 # Guardar el resultado en un nuevo archivo
 filtered_path = "monthly_historical_apr_oct_climate_soil_data_by_station.csv"
-filtered_df.to_csv(f'{source_directory}/filtered_path', index=False)
+filtered_df.to_csv(f'{source_directory}/{filtered_path}', index=False)
 
 
 # Obtener combinaciones únicas de lat/lon/año
 locations = filtered_df[['lat_centroid', 'lon_centroid', 'year']].drop_duplicates().head(3)
+locations.to_csv('locations.csv')
 
 # Definir los meses de interés (abril a octubre)
 months = [f"{m:02d}" for m in range(4, 11)]

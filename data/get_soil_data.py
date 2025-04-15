@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from typing import Iterable, Tuple, List
 from dotenv import load_dotenv
+from tqdm import tqdm
 
 load_dotenv()
 
@@ -54,7 +55,8 @@ def get_soil_data(
     }
 
     delay = 2
-
+    print(url)
+    print(params)
     for attempt in range(1, max_retries + 1):
         try:
             response = requests.get(url, params=params, timeout=10)
@@ -121,19 +123,58 @@ def get_soil_data(
         **{f"{e}": None for e in elements}
     }])
 
-def get_soil_scan_stations_dataframe(station_coords, elements = ["phh2o", "ocd", "cec", "sand", "silt", "clay"]):
+def get_soil_scan_stations_dataframe(
+    station_coords: pd.DataFrame, 
+    elements: List[str] = ["phh2o", "ocd", "cec", "sand", "silt", "clay"],
+    sleep_time: int = 12,
+    verbose: bool = True
+) -> pd.DataFrame:
+    """
+    Obtiene los datos de SoilGrids para cada estación en `station_coords`,
+    respetando el límite de 6 llamadas por minuto (1 cada 10 segundos).
+    
+    Parameters
+    ----------
+    station_coords : pd.DataFrame
+        DataFrame con columnas 'latitude', 'longitude' y 'stationTriplet'.
+    elements : List[str]
+        Lista de propiedades edáficas a consultar.
+    sleep_time : int
+        Tiempo de espera entre llamadas (por defecto 10 segundos).
+    verbose : bool
+        Muestra progreso si True.
+    
+    Returns
+    -------
+    pd.DataFrame
+        Datos de suelo por estación.
+    """
     soils_list = []
-    for idx, station_coord in station_coords.iterrows():
+
+    iterator = tqdm(station_coords.iterrows(), total=len(station_coords)) if verbose else station_coords.iterrows()
+
+    for idx, station_coord in iterator:
         latitude = station_coord['latitude']
         longitude = station_coord['longitude']
-        soil_df = get_soil_data(latitude, longitude, elements, depth_range = (15,30), max_retries=5) 
-        soil_df['stationTriplet'] = station_coord['stationTriplet']
-        if soil_df is not None and not soil_df.empty:
-            soils_list.append(soil_df)
-    # Concatenar todos los resultados en un único DataFrame
-    soil_data_by_scan_stations = pd.concat(soils_list, ignore_index=True)
-    return soil_data_by_scan_stations
+        triplet = station_coord['stationTriplet']
 
+        try:
+            soil_df = get_soil_data(latitude, longitude, elements, depth_range=(15, 30), max_retries=5)
+            soil_df['stationTriplet'] = triplet
+
+            if soil_df is not None and not soil_df.empty:
+                soils_list.append(soil_df)
+
+        except Exception as e:
+            print(f"Error en estación {triplet} ({latitude}, {longitude}): {e}")
+            continue
+
+        time.sleep(sleep_time)
+
+    if soils_list:
+        return pd.concat(soils_list, ignore_index=True)
+    else:
+        return pd.DataFrame()  # Vacío si todas fallan
 
 def save_soil_scan_stations_dataframe(soil_data_by_scan_stations):
     os.makedirs('source_data', exist_ok=True)

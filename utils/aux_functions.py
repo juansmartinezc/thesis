@@ -11,8 +11,40 @@ source_data_directory = os.environ.get("SOURCE_DATA_DIRECTORY")
 #base_dir = Path(__file__).resolve().parent.parent
 #source_data_directory = f"{base_dir} / {source_data_directory}"
 
+def scan_stations_in_corn_belt_states(
+        stations: pd.DataFrame | str,
+        fips_map: dict[str, str],
+        state_col: str = "stateCode"
+) -> pd.DataFrame:
+    """
+    Return the subset of SCAN stations that are located in the states
+    contained in `fips_map`.
 
-def create_monthly_climate_data_by_scan_station(stations_data_list): 
+    Parameters
+    ----------
+    stations : DataFrame | str
+        • A pandas DataFrame that already holds the station data, **or**  
+        • A path/URL to a CSV file that can be read with `pd.read_csv`.
+    fips_map : dict
+        Mapping of 2‑digit state FIPS codes to 2‑letter abbreviations.
+    state_col : str, default "stateCode"
+        Name of the column that contains state abbreviations.
+
+    Returns
+    -------
+    pd.DataFrame
+        Filtered DataFrame containing only stations whose state is in `fips_map`.
+    """
+    
+    # Normalise the column to string and filter
+    stations[state_col] = stations[state_col].astype(str).str.upper()
+    target_states: set[str] = set(fips_map.values())
+
+    return stations[stations[state_col].isin(target_states)].reset_index(drop=True)
+
+
+
+def create_historical_monthly_climate_data_by_scan_station(stations_data_list): 
     dfs_result = []
     for station_data in stations_data_list:
         stationTriplet = station_data['stationTriplet']
@@ -55,9 +87,26 @@ def create_monthly_climate_data_by_scan_station(stations_data_list):
     monthly_climate_data_by_scan_stations = pd.concat(dfs_result, ignore_index=True)
     return monthly_climate_data_by_scan_stations
 
-def save_monthly_climate_data_by_scan_station(monthly_climate_data_by_scan_station): 
+def save_historical_monthly_climate_data_by_scan_station(monthly_climate_data_by_scan_station): 
     os.makedirs('source_data', exist_ok=True)
-    monthly_climate_data_by_scan_station.to_csv(f'{source_data_directory}/monthly_climate_data_by_scan_station.csv', index=False)
+    monthly_climate_data_by_scan_station.to_csv(f'{source_data_directory}/historical_monthly_climate_data_by_scan_station.csv', index=False)
 
+def impute_soil_moisture_depth_8(df):
+    df["date"] = pd.to_datetime(dict(year=df["year"], month=df["month"], day=1))
+    df = df.sort_values(["stationTriplet", "date"])
+
+    # --- 2. Interpolación lineal dentro de cada estación -------------------------
+    df["SMS_-8_interp"] = (
+        df.groupby("stationTriplet", group_keys=False)["SMS_-8"]
+        .apply(lambda s: s.interpolate(method="linear", limit_direction="both"))
+    )
+
+    # --- 3. Fallback climatológico (stationId‑mes) -------------------------------
+    df["SMS_-8"] = df["SMS_-8_interp"].fillna(
+        df.groupby(["stationTriplet", "month"])["SMS_-8_interp"].transform("mean")
+    )
+
+    df = df.drop(columns=["SMS_-8_interp"])
+    return df
 
 

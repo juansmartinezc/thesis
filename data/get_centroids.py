@@ -16,7 +16,7 @@ shape_files = "shape_files"
 # 1) Leer el shapefile de condados
 counties_gdf = gpd.read_file("shape_files/country/cb_2018_us_county_500k.shp")  # Ejemplo
 
-def get_counties_centroids(crop_yield_df):
+def get_counties_centroids(crop_yield_df, state_fips_to_abbr):
     corn_belt_fips = list(state_fips_to_abbr.keys())
     
     # 2) Filtramos
@@ -163,7 +163,7 @@ def assign_scan_station_to_cb_yield_counties(counties_cornbelt_wgs84, stations_d
     # 9. Vincular con datos de la estación (nombre, ID, etc.)
     # ------------------------------------------------------------------------
     joined = joined.merge(
-        stations_proj[["station_idx", "stationTriplet", "stationId", "name"]], 
+        stations_proj[["station_idx", "stationTriplet", "stationId", "latitude", "longitude", "name"]], 
         on="station_idx",
         how="left"
     )
