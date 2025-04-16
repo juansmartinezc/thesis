@@ -1,4 +1,5 @@
 /plot_venv/*
+/dataprep_venv/*
 /venv/*
 results/*
 /excel/*

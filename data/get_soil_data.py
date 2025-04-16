@@ -55,8 +55,6 @@ def get_soil_data(
     }
 
     delay = 2
-    print(url)
-    print(params)
     for attempt in range(1, max_retries + 1):
         try:
             response = requests.get(url, params=params, timeout=10)
@@ -178,4 +176,4 @@ def get_soil_scan_stations_dataframe(
 
 def save_soil_scan_stations_dataframe(soil_data_by_scan_stations):
     os.makedirs('source_data', exist_ok=True)
-    soil_data_by_scan_stations.to_csv(f'{source_data_directory}/soil_data_by_scan_stations.csv', index=False)
+    soil_data_by_scan_stations.to_csv(f'{source_data_directory}/historical_soil_data_by_scan_stations.csv', index=False)

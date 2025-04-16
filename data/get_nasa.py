@@ -90,6 +90,6 @@ def get_climate_missing_values(df):
     print("✅ Valores climáticos completados exitosamente.")
     return df_merged
 
-def save_climate_missing_values(climate_missing_values):
-    climate_missing_values.to_csv(f'{source_data_directory}/historical_monthly_climate_data_apr_sept_by_scan_stations_and_nasa.csv', index=False)
+def save_climate_missing_values(climate_missing_values, file_name = 'historical_monthly_climate_data_apr_sept_by_scan_stations_and_nasa.csv'):
+    climate_missing_values.to_csv(f'{source_data_directory}/{file_name}', index=False)
     print("✅ Datos climáticos guardados en historical_monthly_climate_data_apr_sept_by_scan_stations_and_nasa.csv'")
