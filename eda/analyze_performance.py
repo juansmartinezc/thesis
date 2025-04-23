@@ -1,4 +1,4 @@
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 def plot_errors(cv_result, name):
     # === 5. Graficar errores ===

@@ -4,10 +4,10 @@ import pandas as pd
 import xgboost as xgb
 from sklearn.svm import SVR
 from dotenv import load_dotenv
-from fine_tuning import tune_model
+from eda.fine_tuning import tune_model
 from scipy.stats import uniform, randint
-from metric_functions import get_scorers
-from preprocessor import build_preprocessor 
+from eda.metric_functions import get_scorers
+from eda.preprocessor import build_preprocessor 
 from sklearn.compose import ColumnTransformer
 from sklearn.neural_network import MLPRegressor
 from save_results.save_randomseach_results import save_best_models
@@ -40,7 +40,7 @@ rf_params = {
     'max_depth': randint(5, 30),
     'min_samples_split': randint(2, 10),
     'min_samples_leaf': randint(1, 10),
-    'max_features': ['auto', 'sqrt', 'log2']
+    'max_features': [None, 'sqrt', 'log2']
 }
 
 # === Tuning svr ===
@@ -56,11 +56,14 @@ svr_params = {
 # Variables para este experimentos
 # Metodo de escalizacion: 
 # =========================
-source_data_directory = os.environ.get("SOURCE_DATA_DIRECTORY")
+
 results_path = 'results'
-best_models_path = f"{results_path}/best_models"
-summary_path = os.path.join(best_models_path, 'summary_best_models.csv')
-models_results_path = f"{results_path}/models_results"
+experiment = 'randomsearch'
+models_path = 'models_results'
+source_data_directory = os.environ.get("SOURCE_DATA_DIRECTORY")
+models_results_path = f"{results_path}/{models_path}/{experiment}"
+best_models_path = f"{results_path}/{models_path}/{experiment}/best_models"
+summary_path = f"{results_path}/{models_path}/{experiment}/summary_best_models.csv"
 
 def split_train_test_data(X, y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.2)
@@ -105,44 +108,43 @@ def main():
 
     os.makedirs(models_results_path, exist_ok=True)
     print(f"📁 Carpeta de los resultados de los modelos creada: {models_results_path}")
+
+    os.makedirs(models_results_path, exist_ok=True)
+    print(f"📁 Carpeta de los resumenes de los modelos creada: {summary_path}")
     # === Preprocesamiento ===
     preprocessor, _, _ = build_preprocessor(df)
     scoring = get_scorers()
+    
+    y_mean = y.mean()
 
     # === Tuning XGBoost ===
-    best_xgb, score_xgb, params_xgb = tune_model("XGBoost", xgb.XGBRegressor(objective='reg:squarederror', random_state=42), xgb_params, X, y, preprocessor, scoring, models_results_path)
-
-    best_mlp, score_mlp, params_mlp = tune_model("MLP", MLPRegressor(max_iter=500, random_state=42), mlp_params, X, y, preprocessor, scoring, models_results_path)
-
-    best_rf, score_rf, params_rf = tune_model("RandomForest", RandomForestRegressor(random_state=42), rf_params, X, y, preprocessor, scoring, models_results_path)
-
-    best_svr, score_svr, params_svr = tune_model("SVR", SVR(), svr_params, X, y, preprocessor, scoring, models_results_path)
-
-    # === Guardar resumen general ===
-    # === Guardar resumen general ===
+    score_xgb = tune_model("XGBoost", xgb.XGBRegressor(objective='reg:squarederror', random_state=42), xgb_params, X, y, preprocessor, scoring, models_results_path, best_models_path)
+    nrmse_xgb = (score_xgb / y_mean) * 100
+    print("📝 nrmse_xgb: ", nrmse_xgb)
+    
+    score_mlp = tune_model("MLP", MLPRegressor(max_iter=500, random_state=42), mlp_params, X, y, preprocessor, scoring, models_results_path, best_models_path)
+    nrmse_mlp = (score_mlp / y_mean) * 100
+    print("📝 nrmse_mlp: ", nrmse_mlp)
+    
+    score_rf = tune_model("RandomForest", RandomForestRegressor(random_state=42), rf_params, X, y, preprocessor, scoring, models_results_path, best_models_path)
+    nrmse_rf = (score_rf / y_mean) * 100
+    print("📝 nrmse_rf: ", nrmse_rf)
+    
+    score_svr = tune_model("SVR", SVR(), svr_params, X, y, preprocessor, scoring, models_results_path, best_models_path)
+    nrmse_svr = (score_svr / y_mean) * 100
+    print("📝 nrmse_svr: ", nrmse_svr)
+    
     print("📝 Guardando resumen general de mejores modelos...")
     summary = pd.DataFrame({
         'Model': ['XGBoost', 'MLP', 'RandomForest', 'SVR'],
-        'Best RMSE': [score_xgb, score_mlp, score_rf, score_svr]
+        'Best RMSE': [score_xgb, score_mlp, score_rf, score_svr],
+        'NRMSE (%)': [nrmse_xgb, nrmse_mlp, nrmse_rf, nrmse_svr]
     })
 
-    
     summary.to_csv(summary_path, index=False)
 
     print(f"✅ Resumen guardado en: {summary_path}")
-    save_best_models(best_models_path, best_xgb)
-    save_best_models(best_models_path, best_mlp)
-    save_best_models(best_models_path, best_rf)
-    save_best_models(best_models_path, best_svr)
-
-    '''    
-    # === 6. Mostrar resumen en consola ===
-    for name, res in results.items():
-        print(f"\n📊 Resultados de {name}")
-        print(f"R² train:     {np.mean(res['train_r2']):.3f} ± {np.std(res['train_r2']):.3f}")
-        print(f"R² val:       {np.mean(res['test_r2']):.3f} ± {np.std(res['test_r2']):.3f}")
-        print(f"MAE val:      {np.mean(res['test_mae']):.2f}")
-        print(f"RMSE val:     {np.mean(res['test_rmse']):.2f}")
-    '''
+     
+   
 if __name__ == '__main__':
     main()
