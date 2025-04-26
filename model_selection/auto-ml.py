@@ -20,10 +20,11 @@ summary_path = os.path.join(models_results_path, 'summary_best_models.csv')
 # FUNCIONES
 # =========================
 
+
 def run_automl(X, y, save_path):
     df = X.copy()
     df['target'] = y
-
+    
     print("🔧 Configurando entorno AutoML con PyCaret...")
     setup(data=df, target='target', session_id=42, experiment_name="automl_experiment")
 

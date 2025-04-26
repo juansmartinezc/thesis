@@ -1,19 +1,14 @@
 import os
-import joblib
 import pandas as pd
 import xgboost as xgb
 from sklearn.svm import SVR
 from dotenv import load_dotenv
-from eda.fine_tuning import tune_model
 from scipy.stats import uniform, randint
-from eda.metric_functions import get_scorers
-from eda.preprocessor import build_preprocessor 
-from sklearn.compose import ColumnTransformer
 from sklearn.neural_network import MLPRegressor
-from save_results.save_randomseach_results import save_best_models
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OrdinalEncoder
+from model_selection.fine_tuning import tune_model
+from model_selection.metric_functions import get_scorers
+from model_selection.aux_functions import build_preprocessor 
 
 
 ##Posibles parametros de entrenamiento.
@@ -52,9 +47,13 @@ svr_params = {
 }
 
 # =========================
-# 1 experimento
+# Experimento random search
 # Variables para este experimentos
-# Metodo de escalizacion: 
+# Metodo de escalizacion: Standard scaler
+# =========================
+
+# =========================
+# Definicion de directorios
 # =========================
 
 results_path = 'results'
@@ -65,16 +64,11 @@ models_results_path = f"{results_path}/{models_path}/{experiment}"
 best_models_path = f"{results_path}/{models_path}/{experiment}/best_models"
 summary_path = f"{results_path}/{models_path}/{experiment}/summary_best_models.csv"
 
-def split_train_test_data(X, y):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.2)
-    return X_train, X_test, y_train, y_test
 
-def preprocess_data(numerical_cols, categorical_cols):
-    preprocessor = ColumnTransformer(transformers=[
-    ('num', StandardScaler(), numerical_cols),
-    ('cat', OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1), categorical_cols)
-])
-    return preprocessor
+
+# =========================
+# Main Script
+# =========================
 
 def main():
     print("📦 Cargando dataset...")
@@ -87,19 +81,19 @@ def main():
 
     # Obtener variables numericas y categoricas.
 
-    ################# 1. Dividir en X e y#####################
+    ################# 1. Capturar variables categoricas y numericas#####################
     
     categorical_cols = ['state_name', 'county_name']
     numerical_cols = [col for col in df.columns if col not in categorical_cols + ['Value']]
     X = df.drop(columns='Value')
     y = df['Value']
     
-    X_train, X_test, y_train, y_test = split_train_test_data(X, y)
-
-    ################# 2. Dividir en X e Y#####################
-    preprocessor = preprocess_data(numerical_cols, categorical_cols)
-
-    # === Crear carpeta para resultados ===
+    ########################### 2. Preprocesar los datos###############################
+    
+    preprocessor, _, _ = build_preprocessor(numerical_cols, categorical_cols)
+    
+    ########################### 3. Creacion de directorio###############################
+    
     os.makedirs(results_path, exist_ok=True)
     print(f"📁 Carpeta de resultados creada: {results_path}")
 
@@ -111,29 +105,35 @@ def main():
 
     os.makedirs(models_results_path, exist_ok=True)
     print(f"📁 Carpeta de los resumenes de los modelos creada: {summary_path}")
-    # === Preprocesamiento ===
-    preprocessor, _, _ = build_preprocessor(df)
+    
+    ###################### 4. Obtener metricas de rendimiento###############################
+    
     scoring = get_scorers()
     
+    ############### 5. Obtencion de media para normalizar la salidas #######################
     y_mean = y.mean()
 
-    # === Tuning XGBoost ===
+    ################################# 6. Tunning de XGBOOST #######################################
     score_xgb = tune_model("XGBoost", xgb.XGBRegressor(objective='reg:squarederror', random_state=42), xgb_params, X, y, preprocessor, scoring, models_results_path, best_models_path)
     nrmse_xgb = (score_xgb / y_mean) * 100
     print("📝 nrmse_xgb: ", nrmse_xgb)
     
+    ################################## 7. Tunning de MLP ##########################################
     score_mlp = tune_model("MLP", MLPRegressor(max_iter=500, random_state=42), mlp_params, X, y, preprocessor, scoring, models_results_path, best_models_path)
     nrmse_mlp = (score_mlp / y_mean) * 100
     print("📝 nrmse_mlp: ", nrmse_mlp)
     
+    ########################### 8. Tunning de Random forest ########################################
     score_rf = tune_model("RandomForest", RandomForestRegressor(random_state=42), rf_params, X, y, preprocessor, scoring, models_results_path, best_models_path)
     nrmse_rf = (score_rf / y_mean) * 100
     print("📝 nrmse_rf: ", nrmse_rf)
     
+    ############################## 9. Tunning de SVR################################################
     score_svr = tune_model("SVR", SVR(), svr_params, X, y, preprocessor, scoring, models_results_path, best_models_path)
     nrmse_svr = (score_svr / y_mean) * 100
     print("📝 nrmse_svr: ", nrmse_svr)
     
+    ############################## 10. Guardar el resumen################################################
     print("📝 Guardando resumen general de mejores modelos...")
     summary = pd.DataFrame({
         'Model': ['XGBoost', 'MLP', 'RandomForest', 'SVR'],
@@ -145,6 +145,6 @@ def main():
 
     print(f"✅ Resumen guardado en: {summary_path}")
      
-   
+############################## Ejecucion principal ################################################
 if __name__ == '__main__':
     main()

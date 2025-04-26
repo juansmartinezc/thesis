@@ -1,7 +1,8 @@
-/plot_venv/*
 /dataprep_venv/*
-/venv/*
 results/*
 /excel/*
 .env
 /source_data/*.xlsx
+/venv/*
+/plot_venv/*
+/automl_venv/*
