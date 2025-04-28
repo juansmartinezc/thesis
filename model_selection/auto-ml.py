@@ -57,12 +57,21 @@ def main():
     df = pd.read_csv(os.path.join(source_data_directory, 'historical_monthly_climate_data_apr_sept_by_scan_stations_and_nasa_final.csv'))
 
     print("🔍 Preparando datos para AutoML...")
-    categorical_cols = ['state_name', 'county_name']
-    numerical_cols = [col for col in df.columns if col not in categorical_cols + ['Value']]
     
-    X = df.drop(columns='Value')
+    X = df.drop(columns={'Unnamed: 0',
+                         'state_alpha',
+                         'county_code',
+                         'stationTriplet', 
+                         'stationId',
+                         'name',
+                         'lat_centroid',
+                         'lon_centroid', 
+                         'unit_desc', 
+                         'Value'})
     y = df['Value']
 
+    print("Columnas de X")
+    print(X.columns)
     # Crear carpetas necesarias
     for path in [results_path, models_results_path, best_models_path]:
         os.makedirs(path, exist_ok=True)
