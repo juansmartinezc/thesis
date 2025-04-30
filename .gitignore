@@ -6,3 +6,5 @@ results/*
 /venv/*
 /plot_venv/*
 /automl_venv/*
+__pycache__/
+*.pyc
