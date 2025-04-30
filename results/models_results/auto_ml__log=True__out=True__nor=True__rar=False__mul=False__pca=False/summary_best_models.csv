@@ -1,0 +1,2 @@
+Model,MAE,MSE,RMSE,R2,MAPE
+Light Gradient Boosting Machine,18.788,699.6214,26.45,0.5958,0.1818

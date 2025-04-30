@@ -1,8 +1,11 @@
 /dataprep_venv/*
-results/*
+results/*.png
 /excel/*
 .env
 /source_data/*.xlsx
 /venv/*
 /plot_venv/*
 /automl_venv/*
+/mlruns/*
+__pycache__
+*.pyc

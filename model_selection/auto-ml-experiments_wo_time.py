@@ -37,7 +37,7 @@ def prepare_data(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     """Separa características (X) y variable objetivo (y)."""
     drop_cols = [
         'Unnamed: 0', 'state_alpha', 'county_code', 'stationTriplet',
-        'stationId', 'name', 'lat_centroid', 'lon_centroid', 'unit_desc'
+        'stationId', 'name', 'lat_centroid', 'lon_centroid', 'unit_desc', 'year', 'month'
     ]
     X = df.drop(columns=drop_cols + ['Value'], errors='ignore')
     y = df['Value']
@@ -131,10 +131,10 @@ def main():
         'log_experiment': True,
         'outliers'     : True,
         'normalize'    : True,
-        'multicol'     : True,
-        'pca'          : True
+        'multicol'     : False,
+        'pca'          : False
     }
-    experiment = make_experiment_name("auto_ml", config)
+    experiment = make_experiment_name("auto_ml_wo_time", config)
 
     # 3) Rutas de salida
     base_dir        = Path("results") / "models_results" / experiment
