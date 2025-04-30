@@ -1,8 +1,0 @@
-{
-    "regressor__activation": "tanh",
-    "regressor__alpha": 0.006608884729488529,
-    "regressor__hidden_layer_sizes": [
-        100
-    ],
-    "regressor__learning_rate_init": 0.09799098521619944
-}
