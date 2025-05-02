@@ -113,7 +113,7 @@ def main():
         return
 
     # 1) Carga de datos
-    data_path = Path().resolve().parent / data_dir / "historical_monthly_climate_data_apr_sept_by_scan_stations_and_nasa_final.csv"
+    data_path = Path(__file__).resolve().parent.parent / data_dir / "historical_monthly_climate_data_apr_sept_by_scan_stations_and_nasa_final.csv"
     df = load_data(data_path)
     X, y = prepare_data(df)
 
