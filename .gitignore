@@ -8,4 +8,7 @@ results/*.png
 /automl_venv/*
 /mlruns/*
 __pycache__
-*.pyc
+*.pkl
+results/models_results/**/best_models/
+results/models_results/randomsearch/
+results/histograms/
