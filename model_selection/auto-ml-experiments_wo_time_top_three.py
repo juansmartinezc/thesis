@@ -29,8 +29,8 @@ def prepare_data(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     ]
     states = ['IOWA', 'INDIANA', 'ILLINOIS']
     X = df[df['state_name'].isin(states)]
-    X = X.drop(columns=drop_cols + ['Value'], errors='ignore')
     y = df['Value']
+    X = X.drop(columns=drop_cols + ['Value'], errors='ignore')
     return X, y
 
 def run_experiment(
@@ -147,4 +147,4 @@ def main():
 
 
 if __name__ == "__main__":
-    X, y = main()
+    main()
