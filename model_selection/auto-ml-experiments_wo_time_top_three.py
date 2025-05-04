@@ -28,9 +28,11 @@ def prepare_data(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
         'stationId', 'name', 'lat_centroid', 'lon_centroid', 'unit_desc', 'year', 'month'
     ]
     states = ['IOWA', 'INDIANA', 'ILLINOIS']
+    print(df.shape)
     X = df[df['state_name'].isin(states)]
-    y = df['Value']
+    y = X['Value']
     X = X.drop(columns=drop_cols + ['Value'], errors='ignore')
+    print(X.shape)
     return X, y
 
 def run_experiment(
@@ -50,7 +52,7 @@ def run_experiment(
 
     # Concatenar X e y para pasarlos a setup()
     df_exp = pd.concat([X, y.rename("target")], axis=1)
-
+    print(df_exp.shape)
     # Setup sin silent (eliminado en PyCaret 3.x) y con configuración completa
     setup(
         data=df_exp,
