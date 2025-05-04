@@ -125,7 +125,7 @@ def main():
         'multicol'     : False,
         'pca'          : False
     }
-    experiment = make_experiment_name("auto_ml_wo_time_top_3", config)
+    experiment = make_experiment_name("auto_ml_wo_time_wo_location_top_3", config)
 
     # 3) Rutas de salida
     base_dir        = Path("results") / "models_results" / experiment
