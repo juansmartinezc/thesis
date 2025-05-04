@@ -24,8 +24,8 @@ def load_data(path: Path) -> pd.DataFrame:
 def prepare_data(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     """Separa características (X) y variable objetivo (y)."""
     drop_cols = [
-        'Unnamed: 0', 'state_alpha', 'county_code', 'stationTriplet',
-        'stationId', 'name', 'lat_centroid', 'lon_centroid', 'unit_desc', 'year', 'month'
+        'Unnamed: 0', 'state_name', 'county_name', 'state_alpha', 'county_code', 'year', 'month', 'stationTriplet',
+        'stationId', 'name', 'lat_centroid', 'lon_centroid', 'latitude', 'longitude', 'unit_desc', 
     ]
     states = ['IOWA', 'INDIANA', 'ILLINOIS']
     X = df[df['state_name'].isin(states)]
