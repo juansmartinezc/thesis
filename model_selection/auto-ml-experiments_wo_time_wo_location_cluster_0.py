@@ -29,7 +29,7 @@ def prepare_data(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     ]
     states = ['WISCONSIN', 'ILLINOIS', 'MINNESOTA']
     X = df[df['state_name'].isin(states)]
-    y = df['Value']
+    y = X['Value']
     X = X.drop(columns=drop_cols + ['Value'], errors='ignore')
     return X, y
 
