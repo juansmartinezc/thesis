@@ -24,12 +24,12 @@ def load_data(path: Path) -> pd.DataFrame:
 def prepare_data(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     """Separa características (X) y variable objetivo (y)."""
     drop_cols = [
-        'Unnamed: 0', 'state_name', 'county_name', 'state_alpha', 'county_code', 'year', 'month', 'stationTriplet',
-        'stationId', 'name', 'lat_centroid', 'lon_centroid', 'latitude', 'longitude', 'unit_desc', 
+        'Unnamed: 0', 'state_alpha', 'county_code', 'year', 'month', 'stationTriplet',
+        'stationId', 'name', 'lat_centroid', 'lon_centroid', 'unit_desc', 
     ]
     states = ['IOWA', 'INDIANA', 'ILLINOIS']
     X = df[df['state_name'].isin(states)]
-    y = df['Value']
+    y = X['Value']
     X = X.drop(columns=drop_cols + ['Value'], errors='ignore')
     return X, y
 
@@ -125,7 +125,7 @@ def main():
         'multicol'     : False,
         'pca'          : False
     }
-    experiment = make_experiment_name("auto_ml_wo_time_top_3", config)
+    experiment = make_experiment_name("auto_ml_wo_time_wo_location_top_3", config)
 
     # 3) Rutas de salida
     base_dir        = Path("results") / "models_results" / experiment
