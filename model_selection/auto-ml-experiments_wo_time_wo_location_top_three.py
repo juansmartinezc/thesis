@@ -24,8 +24,8 @@ def load_data(path: Path) -> pd.DataFrame:
 def prepare_data(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     """Separa características (X) y variable objetivo (y)."""
     drop_cols = [
-        'Unnamed: 0', 'state_alpha', 'county_code', 'year', 'month', 'stationTriplet',
-        'stationId', 'name', 'lat_centroid', 'lon_centroid', 'unit_desc', 
+        'Unnamed: 0', 'state_name', 'county_name', 'state_alpha', 'county_code', 'year', 'month', 'stationTriplet',
+        'stationId', 'name', 'lat_centroid', 'lon_centroid', 'latitude', 'longitude', 'unit_desc', 
     ]
     states = ['IOWA', 'INDIANA', 'ILLINOIS']
     X = df[df['state_name'].isin(states)]
@@ -118,7 +118,7 @@ def main():
     data_path = Path(__file__).resolve().parent.parent / data_dir / "historical_monthly_climate_data_apr_sept_by_scan_stations_and_nasa_final.csv"
     df = load_data(data_path)
     X, y = prepare_data(df)
-
+    print("X Columns: ", X.columns)
     # 2) Configuración del experimento
     config = {
         'log_experiment': True,
