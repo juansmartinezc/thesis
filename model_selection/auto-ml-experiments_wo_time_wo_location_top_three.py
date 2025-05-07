@@ -51,6 +51,8 @@ def run_experiment(
     # Concatenar X e y para pasarlos a setup()
     df_exp = pd.concat([X, y.rename("target")], axis=1)
 
+    print(f"Las columnas del experimento son: {df_exp.columns}")
+
     # Setup sin silent (eliminado en PyCaret 3.x) y con configuración completa
     setup(
         data=df_exp,
