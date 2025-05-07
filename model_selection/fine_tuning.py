@@ -27,9 +27,12 @@ def main():
     experiment = "auto_ml_wo_time_wo_location_top_3__" + "__".join([f"{k[:3]}={v}" for k, v in config.items()])
     print(f"experiment: {experiment}")
     base_dir = Path("results") / "models_results" / experiment
+    print(f"base dir: {base_dir}")
     best_models_dir = base_dir / "best_models"
+    print(f"best_models_dir: {best_models_dir}")
     model_path = best_models_dir / "pycaret_best_model"
-
+    print(f"model_path: {model_path}")
+    
     # Cargar datos y preparar
     data_path = Path(__file__).resolve().parent.parent / data_dir / "historical_monthly_climate_data_apr_sept_by_scan_stations_and_nasa_final.csv"
     df = pd.read_csv(data_path)
