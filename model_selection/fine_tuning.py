@@ -74,15 +74,30 @@ def main():
         tuned_rf = tune_model(rf_model, optimize='RMSE', n_iter=25, verbose=True)
 
     # Obtener y guardar resultados
+    # Obtener resultados del tuning
     tuned_leaderboard = pull()
-    tuned_leaderboard.to_csv(base_dir / "rf_tuned_leaderboard.csv", index=False)
+    tuned_leaderboard.to_csv(base_dir / "rf_tuned_leaderboard.csv")
 
     # Guardar modelo ajustado
-    save_model(tuned_rf, best_models_dir / "pycaret_rf_tuned_model")
+    tuned_model_path = best_models_dir / "pycaret_rf_tuned_model"
+    save_model(tuned_rf, tuned_model_path)
 
-    # Guardar resumen del modelo ajustado
-    best_row = tuned_leaderboard.iloc[0][['Model', 'MAE', 'MSE', 'RMSE', 'R2', 'MAPE']]
-    best_row.to_frame().T.to_csv(base_dir / "summary_rf_tuned_model.csv", index=False)
+    # Guardar resumen de métricas si existe la fila 'Mean'
+    summary_path = base_dir / "summary_rf_tuned_model.csv"
+    if 'Mean' in tuned_leaderboard.index:
+        best_row = tuned_leaderboard.loc['Mean'][['MAE', 'MSE', 'RMSE', 'R2', 'MAPE']]
+        best_row.to_frame().T.to_csv(summary_path, index=False)
+        logger.info("✅ Guardado resumen del modelo ajustado.")
+    else:
+        logger.warning("❗ No se encontró la fila 'Mean' en tuned_leaderboard. No se guardó el resumen.")
+
+    # Guardar hiperparámetros ajustados
+    params_path = base_dir / "rf_tuned_model_params.txt"
+    with open(params_path, "w") as f:
+        f.write(f"# Hiperparámetros del modelo ajustado ({type(tuned_rf).__name__})\n")
+        for k, v in tuned_rf.get_params().items():
+            f.write(f"{k}: {v}\n")
+    logger.info(f"📄 Hiperparámetros guardados en {params_path}")
 
     logger.info("✅ Tuning finalizado exitosamente para Random Forest.")
 
