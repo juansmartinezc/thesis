@@ -1,0 +1,2 @@
+Model,MAE,MSE,RMSE,R2,MAPE
+Random Forest Regressor,15.5556,401.5607,20.0379,0.6503,0.1093
